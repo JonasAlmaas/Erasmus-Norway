@@ -92,16 +92,14 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
                     }
                 }
                 payload_str = json.dumps(payload)
-                # payload_str.replace("\r\n","")
                 print("Payload", payload_str)
 
-                # {\"code\": 303, \"payload\": {\"rfid\": \"abc123\"}}'
                 await nc.publish("rfidarm.telemetry", payload_str.encode())
                 print("Done publishing")
                 
         sub = await nc.subscribe("rfidarm.job", cb=message_handler)
 
-        # # TEST
+        # TEST
         # await request_rfid()
         # print(rfid)
         # payload = {
