@@ -11,7 +11,9 @@ import time
 
 
 with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
-    time.sleep(1.65)
+    
+    def clear_serial():
+        arduino.readline()
 
     def send_to_arduino(data: str):
         arduino.write(str(data).encode())
@@ -33,28 +35,32 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
             rfid = rfid.lstrip("b")
             rfid = rfid.strip("'")
             rfid = rfid.rstrip("\\r\\n")
+            print(rfid)
             return True
 
         return False
 
     # The robot should be positioned over the rfid reader when this is called
     async def request_rfid():
+        clear_serial()
         send_to_arduino(f'0,0,0,0,1')
         while (read_arduino_rfid_response() != True):
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
 
     # Inputs are floats between 0 and 1 for positions
-    def move_to(basePos: float, armPos: float, zPos: float, vacuum: int):
+    async def move_to(basePos: float, armPos: float, zPos: float, vacuum: int):
         base = -int((1200 + 1200) * basePos - 1200)
         arm = -int((1400 + 1400) * armPos - 1400)
         z = int((14000 + 14000) * zPos - 14000)
 
+        clear_serial()
+        
         # Send move to arduino
         send_to_arduino(f'{base},{arm},{z},{vacuum},0')
 
         # Wait for arduino to respond
         while (read_arduino_response() != True):
-            time.sleep(0.3)
+            await asyncio.sleep(0.1)
 
     async def main():
         nc = NATS()
@@ -99,6 +105,9 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
                 
         sub = await nc.subscribe("rfidarm.job", cb=message_handler)
 
+        print("Move to above pickup")
+        await move_to(0.5, 0.25, 0.25, 0)
+
         # TEST
         # await request_rfid()
         # print(rfid)
@@ -112,26 +121,42 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         # print("Payload", payload_str)
 
         while True:
+            await run_robot()
             await asyncio.sleep(1)
         
         await sub.drain()
         await nc.drain()
     
     async def run_robot():
-        # print("Move to pos 1")
-        # move_to(1, 0.5, 0.67845, 0)
-        # print("Move to pos 2")
-        # move_to(0.5, 0.5, 0.5, 0)
+        print("Move to pickup")
+        await move_to(0.5, 0.25, 0.0015, 0)
+        print("Turn on vacuum")
+        await move_to(0.5, 0.25, 0.0015, 1)
+        await asyncio.sleep(1)
+        print("Lift up over pickup")
+        await move_to(0.5, 0.25, 0.6, 1)
 
-        # The robot better be positioned over the rfid reader!
+        print("Move to above rfid reader")
+        await move_to(0.01, 0.25, 0.6, 1)
+        print("Read the rfid")
         await request_rfid()
 
-        # print("Move to pos 3")
-        # print("Move to pos 4")
+        print("Move to drop-off")
+        await move_to(1, 0.5, 0.6, 1)
+        print("Drop chip")
+        await move_to(1, 0.5, 0.6, 0)
+        await asyncio.sleep(1)
+
+        print("Move to above pickup")
+        await move_to(0.5, 0.25, 0.25, 0)
 
     if __name__ == "__main__":
         print("Start")
 
+        # Clear serial monitor
+        arduino.readline()
+
+        print("Homeing...")
         # Wait for robot to get done homeing
         while (read_arduino_response() != True):
             time.sleep(0.3)
