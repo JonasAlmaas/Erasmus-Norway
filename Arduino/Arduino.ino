@@ -168,8 +168,8 @@ void Homing()
     {
         stepperZ.setSpeed(1000);
         stepperZ.runSpeed();
-        stepperZ.setCurrentPosition(14000);
     }
+    stepperZ.setCurrentPosition(14000);
     delay(20);
     // Move stepper Z to start postion
     stepperZ.moveTo(0);
@@ -185,8 +185,8 @@ void Homing()
     {
         stepperArm.setSpeed(-800);
         stepperArm.runSpeed();
-        stepperArm.setCurrentPosition(-1400);
     }
+    stepperArm.setCurrentPosition(-1400);
     delay(20);
     // Move stepper Arm to start postion
     stepperArm.moveTo(0);
@@ -202,8 +202,8 @@ void Homing()
     {
         stepperBase.setSpeed(-800);
         stepperBase.runSpeed();
-        stepperBase.setCurrentPosition(-1200);
     }
+    stepperBase.setCurrentPosition(-1200);
     delay(20);
     // Move stepper Arm to start postion
     stepperBase.moveTo(0);
