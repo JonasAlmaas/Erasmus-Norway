@@ -108,6 +108,62 @@ void loop()
         case 2:
         {
             // Homing();
+            // Wtf?? Calling the homing function makes it break¨
+            // So, ctrl+c ctrl+v
+            bool doneBase, doneArm, doneZ;
+            while (!(doneBase && doneArm && doneZ))
+            {
+                doneBase = digitalRead(limitSwitchBase);
+                doneArm = digitalRead(limitSwitchArm);
+                doneZ = digitalRead(limitSwitchZ);
+                
+                if (!doneBase)
+                {
+                    stepperBase.setSpeed(-800);
+                    stepperBase.runSpeed();
+                }
+
+                if (!doneArm)
+                {
+                    stepperArm.setSpeed(-800);
+                    stepperArm.runSpeed();
+                }
+
+                if (!doneZ)
+                {
+                    stepperZ.setSpeed(1000);
+                    stepperZ.runSpeed();
+                }
+            }
+            
+            stepperBase.setCurrentPosition(-1200);
+            stepperArm.setCurrentPosition(-1400);
+            stepperZ.setCurrentPosition(14000);
+
+            stepperBase.moveTo(0);
+            stepperArm.moveTo(0);
+            stepperZ.moveTo(10000);
+
+            doneBase = false;
+            doneArm = false;
+            doneZ = false;
+
+            while (!(doneBase && doneArm && doneZ))
+            {
+                doneBase = stepperBase.currentPosition() == 0;
+                doneArm = stepperArm.currentPosition() == 0;
+                doneZ = stepperZ.currentPosition() == 10000;
+
+                if (!doneBase)
+                    stepperBase.run();
+
+                if (!doneArm)
+                    stepperArm.run();
+
+                if (!doneZ)
+                    stepperZ.run();
+            }
+            
             MoveDone();
             break;
         }
