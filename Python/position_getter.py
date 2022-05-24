@@ -5,7 +5,7 @@ import time
 
 
 with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
-    
+
     def send_to_arduino(data: str):
         arduino.write(str(data).encode())
 
@@ -84,6 +84,7 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         # Clear serial monitor
         arduino.readline()
 
+        print("Homeing...")
         # Wait for robot to get done homeing
         while (read_arduino_response() != True):
             time.sleep(0.3)

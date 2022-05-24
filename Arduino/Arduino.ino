@@ -105,25 +105,25 @@ void loop()
 
 void MoveRobot()
 {
-    // Move stepper Z
-    stepperZ.moveTo(data[2]);
-    while (stepperZ.currentPosition() != data[2])
-    {
-        stepperZ.run();
-    }
-
-    // Move stepper Arm to start postion
-    stepperArm.moveTo(data[1]);
-    while (stepperArm.currentPosition() != data[1])
-    {
-        stepperArm.run();
-    }
-
-    // Move stepper Arm to start postion
     stepperBase.moveTo(data[0]);
-    while (stepperBase.currentPosition() != data[0])
+    stepperArm.moveTo(data[1]);
+    stepperZ.moveTo(data[2]);
+
+    bool doneBase = false, doneArm = false, doneZ = false;
+    while (!(doneBase && doneArm && doneZ))
     {
-        stepperBase.run();
+        doneBase = stepperBase.currentPosition() == data[0];
+        doneArm = stepperArm.currentPosition() == data[1];
+        doneZ = stepperZ.currentPosition() == data[2];
+
+        if (!doneBase)
+            stepperBase.run();
+
+        if (!doneArm)
+            stepperArm.run();
+
+        if (!doneZ)
+            stepperZ.run();
     }
 }
 
@@ -163,54 +163,57 @@ void Homing()
     digitalWrite(vacuum, false);
     delay(100);
 
-    // Home Z
-    while (!digitalRead(limitSwitchZ))
+    bool doneBase, doneArm, doneZ;
+    while (!(doneBase && doneArm && doneZ))
     {
-        stepperZ.setSpeed(1000);
-        stepperZ.runSpeed();
-    }
-    stepperZ.setCurrentPosition(14000);
-    delay(20);
-    // Move stepper Z to start postion
-    stepperZ.moveTo(0);
-    while (stepperZ.currentPosition() != 0)
-    {
-        stepperZ.run();
-    }
+        doneBase = digitalRead(limitSwitchBase);
+        doneArm = digitalRead(limitSwitchArm);
+        doneZ = digitalRead(limitSwitchZ);
+        
+        if (!doneBase)
+        {
+            stepperBase.setSpeed(-800);
+            stepperBase.runSpeed();
+        }
 
-    delay(100);
+        if (!doneArm)
+        {
+            stepperArm.setSpeed(-800);
+            stepperArm.runSpeed();
+        }
 
-    // Home Arm
-    while (!digitalRead(limitSwitchArm))
-    {
-        stepperArm.setSpeed(-800);
-        stepperArm.runSpeed();
+        if (!doneZ)
+        {
+            stepperZ.setSpeed(1000);
+            stepperZ.runSpeed();
+        }
     }
-    stepperArm.setCurrentPosition(-1400);
-    delay(20);
-    // Move stepper Arm to start postion
-    stepperArm.moveTo(0);
-    while (stepperArm.currentPosition() != 0)
-    {
-        stepperArm.run();
-    }
-
-    delay(100);
-
-    // Home Base
-    while (!digitalRead(limitSwitchBase))
-    {
-        stepperBase.setSpeed(-800);
-        stepperBase.runSpeed();
-    }
+    
     stepperBase.setCurrentPosition(-1200);
-    delay(20);
-    // Move stepper Arm to start postion
-    stepperBase.moveTo(0);
-    while (stepperBase.currentPosition() != 0)
-    {
-        stepperBase.run();
-    }
+    stepperArm.setCurrentPosition(-1400);
+    stepperZ.setCurrentPosition(14000);
 
-    delay(100);
+    stepperBase.moveTo(0);
+    stepperArm.moveTo(0);
+    stepperZ.moveTo(10000);
+
+    doneBase = false;
+    doneArm = false;
+    doneZ = false;
+
+    while (!(doneBase && doneArm && doneZ))
+    {
+        doneBase = stepperBase.currentPosition() == 0;
+        doneArm = stepperArm.currentPosition() == 0;
+        doneZ = stepperZ.currentPosition() == 10000;
+
+        if (!doneBase)
+            stepperBase.run();
+
+        if (!doneArm)
+            stepperArm.run();
+
+        if (!doneZ)
+            stepperZ.run();
+    }
 }

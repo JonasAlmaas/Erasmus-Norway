@@ -54,7 +54,7 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         z = int((14000 + 14000) * zPos - 14000)
 
         clear_serial()
-        
+
         # Send move to arduino
         send_to_arduino(f'{base},{arm},{z},{vacuum},0')
 
@@ -105,8 +105,8 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
                 
         sub = await nc.subscribe("rfidarm.job", cb=message_handler)
 
-        print("Move to above pickup")
-        await move_to(0.5, 0.25, 0.25, 0)
+        print("Move up to start position")
+        await move_to(0.5, 0.5, 0.7, 0)
 
         # TEST
         # await request_rfid()
@@ -128,27 +128,32 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         await nc.drain()
     
     async def run_robot():
-        print("Move to pickup")
-        await move_to(0.5, 0.25, 0.0015, 0)
+        print("Move to above pickup")
+        await move_to(1, 0.5, 0.7, 0)
+        print("Move down to pickup")
+        await move_to(1, 0.5, 0.56, 0)
         print("Turn on vacuum")
-        await move_to(0.5, 0.25, 0.0015, 1)
+        await move_to(1, 0.5, 0.56, 1)
         await asyncio.sleep(1)
         print("Lift up over pickup")
-        await move_to(0.5, 0.25, 0.6, 1)
+        await move_to(1, 0.5, 0.7, 1)
 
         print("Move to above rfid reader")
-        await move_to(0.01, 0.25, 0.6, 1)
+        await move_to(0.01, 0.23, 0.7, 1)
+        await move_to(0.01, 0.23, 0.55, 1)
         print("Read the rfid")
         await request_rfid()
 
         print("Move to drop-off")
-        await move_to(1, 0.5, 0.6, 1)
+        await move_to(0.1, 0.5, 0.55, 1)
+        await move_to(0.1, 0.5, 0, 1)
         print("Drop chip")
-        await move_to(1, 0.5, 0.6, 0)
+        await move_to(0.1, 0.5, 0, 0)
         await asyncio.sleep(1)
-
-        print("Move to above pickup")
-        await move_to(0.5, 0.25, 0.25, 0)
+        print("Move up from drop-off")
+        await move_to(0.1, 0.5, 0.7, 0)
+        print("Move up to start position")
+        await move_to(0.5, 0.5, 0.7, 0)
 
     if __name__ == "__main__":
         print("Start")
