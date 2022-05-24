@@ -160,12 +160,8 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         print("Drop chip")
         await move_to(0.1, 0.5, 0.2, 0)
         await asyncio.sleep(1)
-        print("Move up from drop-off")
-        await move_to(0.1, 0.5, 0.7, 0)
-        print("Move up to start position")
-        await move_to(0.5, 0.5, 0.7, 0)
 
-        # manuel_homing()
+        await manuel_homing()
 
     if __name__ == "__main__":
         print("Start")
