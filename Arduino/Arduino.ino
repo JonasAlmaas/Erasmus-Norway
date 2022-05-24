@@ -56,50 +56,61 @@ void loop()
     // Wait for a command from python
     while (!ReadSerial());
 
-    // If we should read rfid
-    if (data[4] == 1)
+    switch (data[4])
     {
-        while (true)
+        // Run move
+        case 0:
         {
-            if (rfid.PICC_IsNewCardPresent())
-            {
-                rfid.PICC_ReadCardSerial();
-
-                byte *buffer = rfid.uid.uidByte;
-                byte bufferSize = rfid.uid.size;
-
-                String rfid_str;
-
-                // Print to serial monitor
-                for (byte i = 0; i < bufferSize; i++)
-                {
-                    rfid_str += buffer[i] < 0x10 ? "0" : "";
-                    rfid_str += int(buffer[i]);
-                    if (i < bufferSize - 1)
-                        rfid_str += ";";
-                }
-
-                // Send back to python
-                Serial.println(rfid_str);
-
-                // Halt PICC
-                rfid.PICC_HaltA();
-                // Stop encrypting on PCD
-                rfid.PCD_StopCrypto1();
-
-                break;
-            }
-            delay(100);
+            // Set vacuume state
+            digitalWrite(vacuum, data[3]);
+            MoveRobot();
+            MoveDone();
+            break;
         }
-    }
-    else {
-        // Set vacuume state
-        digitalWrite(vacuum, data[3]);
+        // Read rfid
+        case 1:
+        {
+            while (true)
+            {
+                if (rfid.PICC_IsNewCardPresent())
+                {
+                    rfid.PICC_ReadCardSerial();
 
-        MoveRobot();
+                    byte *buffer = rfid.uid.uidByte;
+                    byte bufferSize = rfid.uid.size;
 
-        // Called after the move is done
-        MoveDone();
+                    String rfid_str;
+
+                    // Print to serial monitor
+                    for (byte i = 0; i < bufferSize; i++)
+                    {
+                        rfid_str += buffer[i] < 0x10 ? "0" : "";
+                        rfid_str += int(buffer[i]);
+                        if (i < bufferSize - 1)
+                            rfid_str += ";";
+                    }
+
+                    // Send back to python
+                    Serial.println(rfid_str);
+
+                    // Halt PICC
+                    rfid.PICC_HaltA();
+                    // Stop encrypting on PCD
+                    rfid.PCD_StopCrypto1();
+
+                    break;
+                }
+                delay(100);
+            }
+            break;
+        }
+        // Manual homing
+        case 2:
+        {
+            // Homing();
+            MoveDone();
+            break;
+        }
     }
 }
 
