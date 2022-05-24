@@ -115,9 +115,6 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
                 
         sub = await nc.subscribe("rfidarm.job", cb=message_handler)
 
-        print("Move up to start position")
-        await move_to(0.5, 0.5, 0.7, 0)
-
         # TEST
         # await request_rfid()
         # print(rfid)
@@ -156,10 +153,12 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
 
         print("Move to drop-off")
         await move_to(0.1, 0.5, 0.55, 1)
-        await move_to(0.1, 0.5, 0.2, 1)
+        await move_to(0.1, 0.5, 0.27, 1)
         print("Drop chip")
-        await move_to(0.1, 0.5, 0.2, 0)
+        await move_to(0.1, 0.5, 0.27, 0)
         await asyncio.sleep(1)
+
+        await move_to(0.1, 0.5, 0.5, 0)
 
         await manuel_homing()
 
