@@ -46,6 +46,16 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         send_to_arduino(f'0,0,0,0,1')
         while (read_arduino_rfid_response() != True):
             await asyncio.sleep(0.1)
+    
+    async def manuel_homing():
+        clear_serial()
+        send_to_arduino(f'0,0,0,0,2')
+
+        print("Homeing...")
+        # Wait for robot to get done homeing
+        while (read_arduino_response() != True):
+            time.sleep(0.3)
+        print("Done homing")
 
     # Inputs are floats between 0 and 1 for positions
     async def move_to(basePos: float, armPos: float, zPos: float, vacuum: int):
@@ -154,6 +164,8 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
         await move_to(0.1, 0.5, 0.7, 0)
         print("Move up to start position")
         await move_to(0.5, 0.5, 0.7, 0)
+
+        # manuel_homing()
 
     if __name__ == "__main__":
         print("Start")
