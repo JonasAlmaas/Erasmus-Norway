@@ -165,8 +165,7 @@ with Serial(port="COM7", baudrate=115200, timeout=0.1) as arduino:
     if __name__ == "__main__":
         print("Start")
 
-        # Clear serial monitor
-        arduino.readline()
+        clear_serial()
 
         print("Homeing...")
         # Wait for robot to get done homeing
